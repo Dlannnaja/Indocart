@@ -10,15 +10,20 @@
     table { border-collapse: collapse; width: 100%; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
     .debug { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; }
-    .btn { padding: 8px 12px; border: none; border-radius: 5px; background: #007bff; color: white; cursor: pointer; margin: 2px; }
+    .btn { padding: 6px 10px; border: none; border-radius: 5px; background: #007bff; color: white; cursor: pointer; margin: 2px; font-size: 14px; }
     .btn:hover { background: #0056b3; }
     .active { background: #28a745 !important; }
+    .btn-danger { background: #dc3545; }
+    .btn-danger:hover { background: #a71d2a; }
+    .btn-warning { background: #ffc107; color: black; }
+    .btn-warning:hover { background: #d39e00; }
+    .total-box { margin-top: 15px; font-size: 18px; font-weight: bold; }
   </style>
   <script src="https://unpkg.com/@zxing/library@latest"></script>
 </head>
 <body>
   <h2>POS Scan Indomaret</h2>
-  <video id="preview"></video>
+  <video id="preview" autoplay playsinline></video>
   <p>Status: <span id="status">belum dijalankan</span></p>
 
   <div>
@@ -36,7 +41,7 @@
   <h3>Produk</h3>
   <table>
     <thead>
-      <tr><th>Kode</th><th>Nama</th><th>Harga</th><th>Stok</th></tr>
+      <tr><th>Kode</th><th>Nama</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr>
     </thead>
     <tbody id="productTable"></tbody>
   </table>
@@ -44,15 +49,20 @@
   <h3>Keranjang</h3>
   <table>
     <thead>
-      <tr><th>Kode</th><th>Nama</th><th>Harga</th><th>Qty</th></tr>
+      <tr><th>Kode</th><th>Nama</th><th>Harga</th><th>Qty</th><th>Subtotal</th></tr>
     </thead>
     <tbody id="cartTable"></tbody>
   </table>
 
+  <div class="total-box">
+    Total: Rp <span id="totalBelanja">0</span>
+  </div>
+  <button class="btn" onclick="printInvoice()">Cetak Invoice</button>
+
   <script>
     const products = [];
     const cart = [];
-    let currentMode = "kasir"; // default mode
+    let currentMode = "kasir";
 
     function setMode(mode) {
       currentMode = mode;
@@ -66,27 +76,36 @@
     }
 
     function renderProducts() {
-      const rows = products.map(p =>
+      const rows = products.map((p, i) =>
         `<tr>
           <td>${p.code}</td>
           <td>${p.name}</td>
           <td>Rp ${formatMoney(p.price)}</td>
           <td>${p.stock}</td>
+          <td>
+            <button class="btn btn-warning" onclick="editProduct(${i})">Edit</button>
+            <button class="btn btn-danger" onclick="deleteProduct(${i})">Hapus</button>
+          </td>
         </tr>`
       ).join('');
-      document.getElementById("productTable").innerHTML = rows || '<tr><td colspan="4">Belum ada produk</td></tr>';
+      document.getElementById("productTable").innerHTML = rows || '<tr><td colspan="5">Belum ada produk</td></tr>';
     }
 
     function renderCart() {
-      const rows = cart.map(c =>
-        `<tr>
+      let total = 0;
+      const rows = cart.map(c => {
+        const subtotal = c.price * c.qty;
+        total += subtotal;
+        return `<tr>
           <td>${c.code}</td>
           <td>${c.name}</td>
           <td>Rp ${formatMoney(c.price)}</td>
           <td>${c.qty}</td>
-        </tr>`
-      ).join('');
-      document.getElementById("cartTable").innerHTML = rows || '<tr><td colspan="4">Keranjang kosong</td></tr>';
+          <td>Rp ${formatMoney(subtotal)}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById("cartTable").innerHTML = rows || '<tr><td colspan="5">Keranjang kosong</td></tr>';
+      document.getElementById("totalBelanja").textContent = formatMoney(total);
     }
 
     function simulateScan() {
@@ -132,12 +151,62 @@
       renderCart();
     }
 
+    function deleteProduct(index) {
+      if (confirm("Yakin hapus produk ini?")) {
+        products.splice(index, 1);
+        renderProducts();
+      }
+    }
+
+    function editProduct(index) {
+      const p = products[index];
+      const newName = prompt("Edit nama produk:", p.name);
+      if (!newName) return;
+      const newPrice = parseInt(prompt("Edit harga produk:", p.price), 10);
+      if (isNaN(newPrice)) return alert("Harga tidak valid!");
+      p.name = newName;
+      p.price = newPrice;
+      renderProducts();
+      renderCart();
+    }
+
+    function printInvoice() {
+      let invoiceWindow = window.open("", "_blank");
+      let total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
+      invoiceWindow.document.write(`
+        <html>
+          <head><title>Invoice</title></head>
+          <body>
+            <h2>Invoice Belanja</h2>
+            <table border="1" cellpadding="5" cellspacing="0" width="100%">
+              <tr><th>Kode</th><th>Nama</th><th>Harga</th><th>Qty</th><th>Subtotal</th></tr>
+              ${cart.map(c => `
+                <tr>
+                  <td>${c.code}</td>
+                  <td>${c.name}</td>
+                  <td>Rp ${formatMoney(c.price)}</td>
+                  <td>${c.qty}</td>
+                  <td>Rp ${formatMoney(c.price * c.qty)}</td>
+                </tr>
+              `).join('')}
+            </table>
+            <h3>Total: Rp ${formatMoney(total)}</h3>
+            <p>Terima kasih sudah berbelanja 🙏</p>
+            <script>window.print();<\/script>
+          </body>
+        </html>
+      `);
+      invoiceWindow.document.close();
+    }
+
     async function startCamera() {
       try {
         const codeReader = new ZXing.BrowserBarcodeReader();
-        const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
-        if (devices.length === 0) throw new Error("Tidak ada kamera ditemukan");
-        const backCam = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === "videoinput");
+        if (videoDevices.length === 0) throw new Error("Tidak ada kamera ditemukan");
+        const backCam = videoDevices.find(d => d.label.toLowerCase().includes("back")) || videoDevices[0];
+
         codeReader.decodeFromVideoDevice(backCam.deviceId, "preview", (result, err) => {
           if (result) handleScanResult(result.text);
           if (err && !(err instanceof ZXing.NotFoundException)) console.error(err);
