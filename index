@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS Scan Indomaret</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #preview { width: 100%; max-width: 400px; border: 1px solid #ccc; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    .debug { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; }
+    .btn { padding: 8px 12px; border: none; border-radius: 5px; background: #007bff; color: white; cursor: pointer; margin: 2px; }
+    .btn:hover { background: #0056b3; }
+    .active { background: #28a745 !important; }
+  </style>
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+</head>
+<body>
+  <h2>POS Scan Indomaret</h2>
+  <video id="preview"></video>
+  <p>Status: <span id="status">belum dijalankan</span></p>
+
+  <div>
+    <button id="modeKasir" class="btn active" onclick="setMode('kasir')">Mode Kasir</button>
+    <button id="modeRestok" class="btn" onclick="setMode('restok')">Mode Restok</button>
+  </div>
+
+  <div class="debug">
+    <h3>Manual / Debug (fallback jika kamera tidak tersedia)</h3>
+    <input type="text" id="manualCode" placeholder="Masukkan kode/barcode untuk simulasi">
+    <button class="btn" onclick="simulateScan()">Simulasikan Scan</button>
+    <button class="btn" onclick="loadDemo()">Load Demo Produk</button>
+  </div>
+
+  <h3>Produk</h3>
+  <table>
+    <thead>
+      <tr><th>Kode</th><th>Nama</th><th>Harga</th><th>Stok</th></tr>
+    </thead>
+    <tbody id="productTable"></tbody>
+  </table>
+
+  <h3>Keranjang</h3>
+  <table>
+    <thead>
+      <tr><th>Kode</th><th>Nama</th><th>Harga</th><th>Qty</th></tr>
+    </thead>
+    <tbody id="cartTable"></tbody>
+  </table>
+
+  <script>
+    const products = [];
+    const cart = [];
+    let currentMode = "kasir"; // default mode
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById("modeKasir").classList.toggle("active", mode === "kasir");
+      document.getElementById("modeRestok").classList.toggle("active", mode === "restok");
+      document.getElementById("status").textContent = "Mode sekarang: " + mode.toUpperCase();
+    }
+
+    function formatMoney(num) {
+      return new Intl.NumberFormat('id-ID').format(num);
+    }
+
+    function renderProducts() {
+      const rows = products.map(p =>
+        `<tr>
+          <td>${p.code}</td>
+          <td>${p.name}</td>
+          <td>Rp ${formatMoney(p.price)}</td>
+          <td>${p.stock}</td>
+        </tr>`
+      ).join('');
+      document.getElementById("productTable").innerHTML = rows || '<tr><td colspan="4">Belum ada produk</td></tr>';
+    }
+
+    function renderCart() {
+      const rows = cart.map(c =>
+        `<tr>
+          <td>${c.code}</td>
+          <td>${c.name}</td>
+          <td>Rp ${formatMoney(c.price)}</td>
+          <td>${c.qty}</td>
+        </tr>`
+      ).join('');
+      document.getElementById("cartTable").innerHTML = rows || '<tr><td colspan="4">Keranjang kosong</td></tr>';
+    }
+
+    function simulateScan() {
+      const code = document.getElementById("manualCode").value.trim();
+      if (!code) return alert("Masukkan kode dulu!");
+      handleScanResult(code);
+      document.getElementById("manualCode").value = "";
+    }
+
+    function loadDemo() {
+      products.push({ code: "12345", name: "Aqua Botol 600ml", price: 5000, stock: 10 });
+      products.push({ code: "67890", name: "Indomie Goreng", price: 3500, stock: 20 });
+      products.push({ code: "11111", name: "Teh Kotak 200ml", price: 4000, stock: 15 });
+      renderProducts();
+    }
+
+    function handleScanResult(code) {
+      let p = products.find(x => x.code === code);
+
+      if (!p) {
+        const name = prompt("Nama produk baru untuk kode " + code + ":");
+        const price = parseInt(prompt("Harga produk:"), 10) || 0;
+        p = { code, name, price, stock: 0 };
+        products.push(p);
+      }
+
+      if (currentMode === "restok") {
+        p.stock++;
+        document.getElementById("status").textContent = "Restok: " + p.name + " stok sekarang " + p.stock;
+      } else {
+        if (p.stock > 0) {
+          p.stock--;
+          let c = cart.find(x => x.code === code);
+          if (!c) cart.push({ code, name: p.name, price: p.price, qty: 1 });
+          else c.qty++;
+          document.getElementById("status").textContent = "Kasir: " + p.name + " ditambahkan ke keranjang";
+        } else {
+          alert("Stok habis untuk " + p.name);
+        }
+      }
+
+      renderProducts();
+      renderCart();
+    }
+
+    async function startCamera() {
+      try {
+        const codeReader = new ZXing.BrowserBarcodeReader();
+        const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
+        if (devices.length === 0) throw new Error("Tidak ada kamera ditemukan");
+        const backCam = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
+        codeReader.decodeFromVideoDevice(backCam.deviceId, "preview", (result, err) => {
+          if (result) handleScanResult(result.text);
+          if (err && !(err instanceof ZXing.NotFoundException)) console.error(err);
+        });
+      } catch (e) {
+        document.getElementById("status").textContent = "Error: " + e.message;
+      }
+    }
+
+    startCamera();
+  </script>
+</body>
+</html>
