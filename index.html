@@ -969,17 +969,17 @@ function savePrinterPreference(){
   localStorage.setItem('preferredPrinter', sel.value)
   alert(sel.value ? 'Preferensi printer disimpan: ' + sel.value : 'Preferensi printer dikosongkan')
 }
-  function printRestock() {
+  function printRestockTable() {
   const tbl = document.getElementById("restockTbl");
-  if(!tbl) return alert("Tabel restock tidak ditemukan");
+  if (!tbl) return alert("Tabel restock tidak ditemukan");
 
   // ambil HTML tabel saja
-  let html = `
+  const html = `
     <html>
     <head>
-      <title>Print Restock</title>
+      <title>Restock</title>
       <style>
-        body { font-family: Arial, sans-serif; font-size: 12px; padding: 10px; }
+        body { font-family: Arial, sans-serif; padding: 10px; }
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
         th { background: #f0f0f0; }
@@ -987,20 +987,24 @@ function savePrinterPreference(){
       </style>
     </head>
     <body>
-      <h3>Laporan Restock</h3>
+      <h3>Data Restock</h3>
       ${tbl.outerHTML}
     </body>
     </html>
   `;
 
   const w = window.open("", "_blank", "width=800,height=600");
-  if(!w) return alert("Popup terblokir");
   w.document.write(html);
   w.document.close();
   w.focus();
-  try { w.print(); setTimeout(()=>w.close(), 1000); } catch(e) { w.close(); console.error(e); }
+  try {
+    w.print();
+    setTimeout(() => w.close(), 1000);
+  } catch (e) {
+    w.close();
+    console.error(e);
+  }
 }
-
 
 /* ---------- checkout with robust date + printer check ---------- */
 function checkout(){
