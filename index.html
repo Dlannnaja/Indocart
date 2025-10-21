@@ -828,20 +828,26 @@ function render(){
 
 /* ---------- product CRUD ---------- */
 function submitProduct(){
-  const sku=document.getElementById("sku").value.trim()
-  const name=document.getElementById("name").value.trim()
-  const price=parseInt(document.getElementById("price").value)
-  const qty=parseInt(document.getElementById("qty").value)
+  const sku = document.getElementById("sku").value.trim()
+  const name = document.getElementById("name").value.trim()
+  const price = parseInt(document.getElementById("price").value)
+  const qty = parseInt(document.getElementById("qty").value)
   if(!sku || !name || !price || !qty) return alert("Lengkapi data!")
-  const exist=products.find(p=>p.sku===sku)
+  
+  const exist = products.find(p => p.sku === sku)
   if(exist){
     exist.qty += qty
     exist.price = price
-  }else{
-    products.push({sku,name,price,qty})
+  } else {
+    products.push({sku, name, price, qty})
   }
-  localStorage.setItem("products",JSON.stringify(products))
-  render(); resetForm()
+
+  localStorage.setItem("products", JSON.stringify(products))
+  render()
+  resetForm()
+
+  // ✅ Tambahkan notifikasi sukses
+  alert("Berhasil ditambahkan!")
 }
 
 function resetForm(){
@@ -963,6 +969,38 @@ function savePrinterPreference(){
   localStorage.setItem('preferredPrinter', sel.value)
   alert(sel.value ? 'Preferensi printer disimpan: ' + sel.value : 'Preferensi printer dikosongkan')
 }
+  function printRestock() {
+  const tbl = document.getElementById("restockTbl");
+  if(!tbl) return alert("Tabel restock tidak ditemukan");
+
+  // ambil HTML tabel saja
+  let html = `
+    <html>
+    <head>
+      <title>Print Restock</title>
+      <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; padding: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+        th { background: #f0f0f0; }
+        tbody tr:nth-child(even) { background: #f9f9f9; }
+      </style>
+    </head>
+    <body>
+      <h3>Laporan Restock</h3>
+      ${tbl.outerHTML}
+    </body>
+    </html>
+  `;
+
+  const w = window.open("", "_blank", "width=800,height=600");
+  if(!w) return alert("Popup terblokir");
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  try { w.print(); setTimeout(()=>w.close(), 1000); } catch(e) { w.close(); console.error(e); }
+}
+
 
 /* ---------- checkout with robust date + printer check ---------- */
 function checkout(){
@@ -1041,8 +1079,7 @@ function printReceipt(t){
     throw e
   }
 }
-
-/* ---------- SCAN ---------- */
+  
 /* ---------- SCAN ---------- */
 let html5QrcodeScanner = null;
 let scanTarget = null;
