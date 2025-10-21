@@ -157,6 +157,88 @@
     font-size: var(--font-size-base);
     min-width: 100%;
   }
+    /* === Laporan Penjualan === */
+#salesTbl {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 700px;
+}
+
+#salesTbl th, #salesTbl td {
+  padding: 10px;
+  border-bottom: 1px solid #f1f3f5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#salesTbl th:nth-child(1), #salesTbl td:nth-child(1) { width: 6%; text-align: center; } /* No */
+#salesTbl th:nth-child(2), #salesTbl td:nth-child(2) { width: 25%; } /* Tanggal */
+#salesTbl th:nth-child(3), #salesTbl td:nth-child(3) { width: 20%; } /* Invoice */
+#salesTbl th:nth-child(4), #salesTbl td:nth-child(4) { width: 35%; } /* Item */
+#salesTbl th:nth-child(5), #salesTbl td:nth-child(5) { width: 14%; text-align: right; } /* Total */
+
+
+/* === Laporan Restock === */
+#restockTbl {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 700px;
+}
+
+#restockTbl th, #restockTbl td {
+  padding: 10px;
+  border-bottom: 1px solid #f1f3f5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#restockTbl th:nth-child(1), #restockTbl td:nth-child(1) { width: 6%; text-align: center; } /* No */
+#restockTbl th:nth-child(2), #restockTbl td:nth-child(2) { width: 18%; } /* Tanggal */
+#restockTbl th:nth-child(3), #restockTbl td:nth-child(3) { width: 15%; } /* SKU */
+#restockTbl th:nth-child(4), #restockTbl td:nth-child(4) { width: 30%; } /* Nama */
+#restockTbl th:nth-child(5), #restockTbl td:nth-child(5) { width: 15%; text-align: center; } /* Jumlah */
+#restockTbl th:nth-child(6), #restockTbl td:nth-child(6) { width: 16%; text-align: right; } /* Stok Akhir */
+
+
+/* === Laporan Stok Akhir === */
+#finalStockTbl {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 650px;
+}
+
+#finalStockTbl th, #finalStockTbl td {
+  padding: 10px;
+  border-bottom: 1px solid #f1f3f5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#finalStockTbl th:nth-child(1), #finalStockTbl td:nth-child(1) { width: 6%; text-align: center; } /* No */
+#finalStockTbl th:nth-child(2), #finalStockTbl td:nth-child(2) { width: 18%; } /* SKU */
+#finalStockTbl th:nth-child(3), #finalStockTbl td:nth-child(3) { width: 36%; } /* Nama */
+#finalStockTbl th:nth-child(4), #finalStockTbl td:nth-child(4) { width: 20%; text-align: center; } /* Stok */
+#finalStockTbl th:nth-child(5), #finalStockTbl td:nth-child(5) { width: 20%; text-align: right; } /* Harga */
+
+/* --- Style seragam agar sama seperti tabel produk --- */
+#salesTbl th, #restockTbl th, #finalStockTbl th {
+  background: #f9fbfd;
+  color: #333;
+  font-weight: 600;
+}
+
+#salesTbl tbody tr:nth-child(even),
+#restockTbl tbody tr:nth-child(even),
+#finalStockTbl tbody tr:nth-child(even) {
+  background: #fcfdff;
+}
+
 
   th, td {
     padding: var(--spacing-sm);
