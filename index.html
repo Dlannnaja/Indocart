@@ -357,70 +357,84 @@
     pointer-events: none !important;
   }
 
-  /* === RAPIKAN SEMUA TABEL DASHBOARD LAPORAN === */
-.table-wrapper {
-  overflow-x: auto;
-  width: 100%;
-  -webkit-overflow-scrolling: touch;
-  border-radius: 8px;
-}
+  
+/* === TABLE STYLE: RAPIH DAN KONSISTEN === */
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: var(--spacing-sm);
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: var(--shadow);
+  }
 
-.table-wrapper table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 650px; /* biar kolom gak sempit */
-  font-size: 13px;
-  background: #fff;
-  border: 1px solid #e8eef8;
-}
-
-.table-wrapper th,
-.table-wrapper td {
-  padding: 8px 10px;
-  border-bottom: 1px solid #f0f2f5;
-  text-align: left;
-  vertical-align: middle;
-  white-space: nowrap;
-}
-
-.table-wrapper th {
-  background: #f7faff;
-  color: #0b74da;
-  font-weight: 600;
-}
-
-.table-wrapper tbody tr:nth-child(even) {
-  background: #fafbfc;
-}
-
-.table-wrapper td:last-child,
-.table-wrapper th:last-child {
-  text-align: right;
-}
-
-/* Responsive fix untuk Android */
-@media (max-width: 600px) {
+/* Tabel di dalam laporan & produk */
   .table-wrapper table {
-    min-width: unset;
-    font-size: 12px;
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+    min-width: 700px;
+    font-size: var(--font-size-base);
   }
 
-  .table-wrapper th,
+/* Header tabel */
+  .table-wrapper th {
+    background: #f9fbfd;
+    color: #333;
+    font-weight: 600;
+    text-align: left;
+    padding: var(--spacing-md);
+    border-bottom: 2px solid #e5eaf0;
+    white-space: nowrap;
+  }
+
+/* Sel data */
   .table-wrapper td {
-    padding: 6px 8px;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid #f1f3f5;
+    vertical-align: middle;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .table-wrapper th:nth-child(1),
-  .table-wrapper td:nth-child(1) {
-    width: 40px;
+/* Warna baris selang-seling */
+  .table-wrapper tbody tr:nth-child(even) {
+    background: #fcfdff;
   }
 
-  .table-wrapper td {
-    word-break: break-word;
-    white-space: normal;
+/* Kolom angka rata kanan */
+  .table-wrapper td:last-child,
+  .table-wrapper th:last-child {
+    text-align: right;
   }
-}
 
+/* Tombol kecil di tabel */
+  .table-wrapper .actions button {
+    margin-right: 4px;
+    padding: 5px 10px;
+    font-size: var(--font-size-small);
+  }
+
+/* Responsive: Android dan layar kecil */
+  @media (max-width: 600px) {
+    .table-wrapper {
+      box-shadow: none;
+      border: 1px solid #e9eef4;
+    }
+
+    .table-wrapper table {
+      min-width: 640px;
+    }
+
+    .table-wrapper th,
+    .table-wrapper td {
+      padding: 8px;
+      font-size: 12px;
+    }
+  }
 
   @media (min-width: 600px) {
     body {
