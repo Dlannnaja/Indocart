@@ -357,32 +357,70 @@
     pointer-events: none !important;
   }
 
-  /* ---------- NEW: responsive table wrapper for mobile (Android) ---------- */
-  .table-wrapper {
-    overflow-x: auto;
-    width: 100%;
-    -webkit-overflow-scrolling: touch;
-  }
+  /* === RAPIKAN SEMUA TABEL DASHBOARD LAPORAN === */
+.table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+}
 
-  /* Prefer tabel tetap rapi: minimal total width agar kolom tidak terlalu sempit di desktop.
-     Untuk mobile, media query menonaktifkan min-width supaya tabel mengikuti lebar layar. */
+.table-wrapper table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 650px; /* biar kolom gak sempit */
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid #e8eef8;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f0f2f5;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table-wrapper th {
+  background: #f7faff;
+  color: #0b74da;
+  font-weight: 600;
+}
+
+.table-wrapper tbody tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+.table-wrapper td:last-child,
+.table-wrapper th:last-child {
+  text-align: right;
+}
+
+/* Responsive fix untuk Android */
+@media (max-width: 600px) {
   .table-wrapper table {
-    min-width: 640px;
+    min-width: unset;
+    font-size: 12px;
   }
 
-  @media (max-width: 600px) {
-    .table-wrapper table {
-      min-width: unset;
-    }
-    th, td {
-      font-size: 12px;
-      padding: 6px 8px;
-    }
-    .actions button {
-      padding: 4px 8px;
-      font-size: 11px;
-    }
+  .table-wrapper th,
+  .table-wrapper td {
+    padding: 6px 8px;
   }
+
+  .table-wrapper th:nth-child(1),
+  .table-wrapper td:nth-child(1) {
+    width: 40px;
+  }
+
+  .table-wrapper td {
+    word-break: break-word;
+    white-space: normal;
+  }
+}
+
 
   @media (min-width: 600px) {
     body {
